@@ -1,6 +1,8 @@
 import random
 import sqlite3
 
+import random
+
 class VirtualPet:
     def __init__(self, pet_type="cat"):
         """Initialize the pet with default values and an optional pet type."""
@@ -106,6 +108,7 @@ class VirtualPet:
         if achievement_name not in self.achievements:
             self.achievements.append(achievement_name)
             print(f"Achievement Unlocked: {achievement_name}")
+
 
 
 class Database:
