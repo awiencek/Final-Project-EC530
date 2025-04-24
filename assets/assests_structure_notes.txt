@@ -1,0 +1,10 @@
+assets/
+└── pet_images/
+    ├── cat/
+    │   ├── happy.png
+    │   ├── sad.png
+    │   └── sleeping.gif
+    └── dog/
+        ├── happy.png
+        ├── eating.gif
+        └── bored.png
