@@ -1,11 +1,17 @@
 # Final-Project-EC530
 
 study_buddy_project/
+
 │
+
 ├── study_buddy.py       # Main app file with GUI
+
 ├── pet.py               # Logic for virtual pet (health, happiness, etc.)
+
 ├── database.py          # Logic for storing user goals and pet state (SQLite)
+
 └── assets/              # Folder for any images or sounds
+
     └── pet_images/      # Folder for pet images (animated)
 
 Core Concept:
