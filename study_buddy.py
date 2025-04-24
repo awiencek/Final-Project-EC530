@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
-from pet import VirtualPet
-from database import Database
+from virtual_pet import VirtualPet
+from pet_database import PetDatabase
+from study_goal_database import StudyGoalDatabase
 
 class StudyBuddyApp:
     def __init__(self, root):
@@ -10,11 +11,11 @@ class StudyBuddyApp:
 
         # Initialize the pet and database
         self.pet = VirtualPet()
-        self.db = Database()
+        self.pet_db = PetDatabase()
+        self.study_goal_db = StudyGoalDatabase()
 
         # Fetch pet status from the database or use default
-        pet_status = self.db.load_pet_state()
-        self.pet = pet_status
+        self.pet = self.pet_db.load_pet_state()
 
         # Create UI elements
         self.create_widgets()
@@ -75,35 +76,35 @@ class StudyBuddyApp:
         """Simulate studying."""
         self.pet.study()
         self.update_pet_status()
-        self.db.save_pet_state(self.pet)
+        self.pet_db.save_pet_state(self.pet)
         messagebox.showinfo("Study Complete", "You studied hard! Your pet is happier!")
 
     def feed_pet(self):
         """Feed the pet."""
         self.pet.feed()
         self.update_pet_status()
-        self.db.save_pet_state(self.pet)
+        self.pet_db.save_pet_state(self.pet)
         messagebox.showinfo("Pet Fed", "Your pet is full and happy!")
 
     def play_with_pet(self):
         """Play with the pet."""
         self.pet.play()
         self.update_pet_status()
-        self.db.save_pet_state(self.pet)
+        self.pet_db.save_pet_state(self.pet)
         messagebox.showinfo("Play Time", "Your pet had fun playing!")
 
     def rest_pet(self):
         """Rest to restore energy."""
         self.pet.rest()
         self.update_pet_status()
-        self.db.save_pet_state(self.pet)
+        self.pet_db.save_pet_state(self.pet)
         messagebox.showinfo("Rest Time", "Your pet is resting and regaining energy.")
 
     def random_event(self):
         """Trigger a random event for the pet."""
         self.pet.random_event()
         self.update_pet_status()
-        self.db.save_pet_state(self.pet)
+        self.pet_db.save_pet_state(self.pet)
 
     def unlock_achievement(self):
         """Unlock an achievement."""
@@ -115,13 +116,6 @@ class StudyBuddyApp:
     def set_study_goal(self):
         """Set a new study goal."""
         goal = simpledialog.askstring("New Goal", "What is your study goal?")
-        if goal:
-            self.db.add_study_goal(goal)
-            messagebox.showinfo("Goal Set", f"Your new study goal: {goal}")
-    
-# Run the app
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = StudyBuddyApp(root)
-    root.mainloop()
+        if goal
+
 
