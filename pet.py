@@ -1,63 +1,69 @@
 import random
-import sqlite3
 
-import random
+MAX_STAT_VALUE = 100
+MIN_STAT_VALUE = 0
 
 class VirtualPet:
     def __init__(self, pet_type="cat"):
         """Initialize the pet with default values and an optional pet type."""
-        self.pet_type = pet_type  # Type of the pet (e.g., 'cat', 'dog')
-        self.happiness = 50  # Pet's happiness on a scale from 0 to 100
-        self.health = 50     # Pet's health on a scale from 0 to 100
-        self.hunger = 50     # Pet's hunger on a scale from 0 to 100
-        self.energy = 50     # Pet's energy on a scale from 0 to 100
-        self.level = 1       # Level of pet (could be used for growth or upgrades)
-        self.experience = 0  # Experience points for leveling up
-        self.achievements = []  # List to store unlocked achievements
+        self.pet_type = pet_type
+        self.happiness = 50
+        self.health = 50
+        self.hunger = 50
+        self.energy = 50
+        self.level = 1
+        self.experience = 0
+        self.achievements = []
+
+    def update_stat(self, stat, value, max_value=MAX_STAT_VALUE):
+        """General method to update any stat with a boundary."""
+        current_value = getattr(self, stat)
+        new_value = min(max(current_value + value, MIN_STAT_VALUE), max_value)
+        setattr(self, stat, new_value)
 
     def feed(self):
         """Feed the pet, improves hunger and happiness based on pet type."""
         if self.pet_type == "cat":
-            self.hunger = min(self.hunger + 15, 100)
+            self.update_stat("hunger", 15)
         elif self.pet_type == "dog":
-            self.hunger = min(self.hunger + 20, 100)
+            self.update_stat("hunger", 20)
         else:
-            self.hunger = min(self.hunger + 10, 100)
-        self.happiness = min(self.happiness + 10, 100)
+            self.update_stat("hunger", 10)
+        self.update_stat("happiness", 10)
 
     def play(self):
         """Play with the pet, increases happiness and energy."""
-        self.happiness = min(self.happiness + 20, 100)
-        self.energy = max(self.energy - 10, 0)
+        self.update_stat("happiness", 20)
+        self.update_stat("energy", -10)
 
     def study(self):
         """Increase pet's happiness, health, and energy based on study."""
-        self.happiness = min(self.happiness + 10, 100)
-        self.health = min(self.health + 5, 100)
-        self.energy = max(self.energy - 15, 0)
-        self.gain_experience(10)  # Gain experience from studying
+        self.update_stat("happiness", 10)
+        self.update_stat("health", 5)
+        self.update_stat("energy", -15)
+        self.gain_experience(10)
 
     def rest(self):
         """Rest to restore energy."""
-        self.energy = min(self.energy + 20, 100)
-        self.happiness = max(self.happiness - 5, 0)
+        self.update_stat("energy", 20)
+        self.update_stat("happiness", -5)
 
     def random_event(self):
         """Random events that affect the pet's state."""
         event = random.choice(["sick", "happy_event", "boredom", "new_favorite_activity"])
         
         if event == "sick":
-            self.health = max(self.health - 10, 0)
-            self.happiness = max(self.happiness - 10, 0)
+            self.update_stat("health", -10)
+            self.update_stat("happiness", -10)
             print("Your pet is feeling sick!")
         elif event == "happy_event":
-            self.happiness = min(self.happiness + 20, 100)
+            self.update_stat("happiness", 20)
             print("Your pet found something exciting!")
         elif event == "boredom":
-            self.happiness = max(self.happiness - 10, 0)
+            self.update_stat("happiness", -10)
             print("Your pet is feeling bored!")
         elif event == "new_favorite_activity":
-            self.happiness = min(self.happiness + 15, 100)
+            self.update_stat("happiness", 15)
             print("Your pet discovered a new favorite activity!")
 
     def gain_experience(self, amount):
@@ -65,15 +71,13 @@ class VirtualPet:
         self.experience += amount
         if self.experience >= 100:
             self.level_up()
-            self.experience = 0  # Reset experience after leveling up
-            print(f"{self.pet_type.capitalize()} leveled up!")
+            self.experience = 0
 
     def level_up(self):
         """Increase pet's level and improve some stats."""
         self.level += 1
-        self.happiness = min(self.happiness + 10, 100)
-        self.energy = min(self.energy + 10, 100)
-        print(f"{self.pet_type.capitalize()} leveled up! Now at level {self.level}!")
+        self.update_stat("happiness", 10)
+        self.update_stat("energy", 10)
 
     def get_status(self):
         """Returns the current status of the pet."""
@@ -85,10 +89,6 @@ class VirtualPet:
             'level': self.level,
             'experience': self.experience
         }
-
-    def is_sad(self):
-        """Return True if the pet is unhappy, which could motivate the user to study more."""
-        return self.happiness < 40
 
     def get_emotion(self):
         """Return a description of the pet's emotional state."""
@@ -109,43 +109,4 @@ class VirtualPet:
             self.achievements.append(achievement_name)
             print(f"Achievement Unlocked: {achievement_name}")
 
-
-
-class Database:
-    def __init__(self):
-        """Initialize the database connection."""
-        self.conn = sqlite3.connect('study_buddy.db')
-        self.cursor = self.conn.cursor()
-
-    def create_table(self):
-        """Create table to store pet state."""
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS pet_state (
-                                happiness INTEGER,
-                                health INTEGER,
-                                hunger INTEGER,
-                                energy INTEGER,
-                                level INTEGER,
-                                experience INTEGER)''')
-        self.conn.commit()
-
-    def save_pet_state(self, pet):
-        """Save the pet's state to the database."""
-        self.cursor.execute('''INSERT INTO pet_state (happiness, health, hunger, energy, level, experience)
-                               VALUES (?, ?, ?, ?, ?, ?)''', 
-                            (pet.happiness, pet.health, pet.hunger, pet.energy, pet.level, pet.experience))
-        self.conn.commit()
-
-    def load_pet_state(self):
-        """Load the pet's state from the database."""
-        self.cursor.execute('SELECT * FROM pet_state ORDER BY ROWID DESC LIMIT 1')
-        row = self.cursor.fetchone()
-        if row:
-            pet = VirtualPet()
-            pet.happiness, pet.health, pet.hunger, pet.energy, pet.level, pet.experience = row
-            return pet
-        return VirtualPet()  # Return a default pet if no state is found
-
-    def close(self):
-        """Close the database connection."""
-        self.conn.close()
 
