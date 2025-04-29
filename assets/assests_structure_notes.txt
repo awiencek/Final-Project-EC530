@@ -1,0 +1,28 @@
+assets/
+└── pet_images/
+    ├── cat/
+    │   ├── happy.png
+    │   ├── sad.png
+    │   └── sleeping.gif
+    └── dog/
+        ├── happy.png
+        ├── eating.gif
+        └── bored.png
+assets/
+└── sounds/
+    ├── cat/
+    │   ├── meow.wav
+    │   └── purr.wav
+    ├── dog/
+    │   ├── bark.wav
+    └── events/
+        ├── level_up.wav
+        └── achievement.wav
+assets/
+└── ui/
+    ├── icons/
+    │   ├── study.png
+    │   ├── rest.png
+    └── backgrounds/
+        └── forest_day.png
+
