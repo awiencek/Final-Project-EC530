@@ -1,112 +1,73 @@
-import random
+from datetime import datetime, timedelta
 
-MAX_STAT_VALUE = 100
-MIN_STAT_VALUE = 0
-
-class VirtualPet:
-    def __init__(self, pet_type="cat"):
-        """Initialize the pet with default values and an optional pet type."""
-        self.pet_type = pet_type
-        self.happiness = 50
-        self.health = 50
-        self.hunger = 50
-        self.energy = 50
-        self.level = 1
-        self.experience = 0
-        self.achievements = []
-
-    def update_stat(self, stat, value, max_value=MAX_STAT_VALUE):
-        """General method to update any stat with a boundary."""
-        current_value = getattr(self, stat)
-        new_value = min(max(current_value + value, MIN_STAT_VALUE), max_value)
-        setattr(self, stat, new_value)
-
-    def feed(self):
-        """Feed the pet, improves hunger and happiness based on pet type."""
-        if self.pet_type == "cat":
-            self.update_stat("hunger", 15)
-        elif self.pet_type == "dog":
-            self.update_stat("hunger", 20)
-        else:
-            self.update_stat("hunger", 10)
-        self.update_stat("happiness", 10)
-
-    def play(self):
-        """Play with the pet, increases happiness and energy."""
-        self.update_stat("happiness", 20)
-        self.update_stat("energy", -10)
-
-    def study(self):
-        """Increase pet's happiness, health, and energy based on study."""
-        self.update_stat("happiness", 10)
-        self.update_stat("health", 5)
-        self.update_stat("energy", -15)
-        self.gain_experience(10)
-
-    def rest(self):
-        """Rest to restore energy."""
-        self.update_stat("energy", 20)
-        self.update_stat("happiness", -5)
-
-    def random_event(self):
-        """Random events that affect the pet's state."""
-        event = random.choice(["sick", "happy_event", "boredom", "new_favorite_activity"])
-        
-        if event == "sick":
-            self.update_stat("health", -10)
-            self.update_stat("happiness", -10)
-            print("Your pet is feeling sick!")
-        elif event == "happy_event":
-            self.update_stat("happiness", 20)
-            print("Your pet found something exciting!")
-        elif event == "boredom":
-            self.update_stat("happiness", -10)
-            print("Your pet is feeling bored!")
-        elif event == "new_favorite_activity":
-            self.update_stat("happiness", 15)
-            print("Your pet discovered a new favorite activity!")
+class Pet:
+    def __init__(self, name="Buddy", level=1, experience=0, hunger=50, energy=50,
+                 happiness=50, streak=0, last_goal_completed_at=None, last_decay_check=None,
+                 paused=False, subject="General"):
+        self.name = name
+        self.level = level
+        self.experience = experience
+        self.hunger = hunger
+        self.energy = energy
+        self.happiness = happiness
+        self.streak = streak
+        self.last_goal_completed_at = last_goal_completed_at
+        self.last_decay_check = last_decay_check or datetime.now().isoformat()
+        self.paused = paused
+        self.subject = subject
+        self.max_experience = 100 + (self.level - 1) * 20
 
     def gain_experience(self, amount):
-        """Increase experience and level up if enough experience is gained."""
         self.experience += amount
-        if self.experience >= 100:
-            self.level_up()
-            self.experience = 0
+        while self.experience >= self.max_experience:
+            self.experience -= self.max_experience
+            self.level += 1
+            self.max_experience = 100 + (self.level - 1) * 20
 
-    def level_up(self):
-        """Increase pet's level and improve some stats."""
-        self.level += 1
-        self.update_stat("happiness", 10)
-        self.update_stat("energy", 10)
+    def feed(self):
+        self.hunger = max(self.hunger - 20, 0)
+        self.happiness = min(self.happiness + 5, 100)
 
-    def get_status(self):
-        """Returns the current status of the pet."""
-        return {
-            'happiness': self.happiness,
-            'health': self.health,
-            'hunger': self.hunger,
-            'energy': self.energy,
-            'level': self.level,
-            'experience': self.experience
-        }
+    def rest(self):
+        self.energy = min(self.energy + 30, 100)
+        self.hunger = min(self.hunger + 5, 100)
 
-    def get_emotion(self):
-        """Return a description of the pet's emotional state."""
-        if self.happiness > 80:
-            return "ecstatic"
-        elif self.happiness > 60:
-            return "happy"
-        elif self.happiness > 40:
-            return "content"
-        elif self.happiness > 20:
-            return "sad"
-        else:
-            return "depressed"
+    def play(self):
+        self.happiness = min(self.happiness + 20, 100)
+        self.energy = max(self.energy - 10, 0)
 
-    def unlock_achievement(self, achievement_name):
-        """Unlock a new achievement."""
-        if achievement_name not in self.achievements:
-            self.achievements.append(achievement_name)
-            print(f"Achievement Unlocked: {achievement_name}")
+    def study(self):
+        self.gain_experience(15)
+        self.energy = max(self.energy - 10, 0)
+        self.hunger = min(self.hunger + 10, 100)
 
+    def get_summary(self):
+        return (f"Name: {self.name}\n"
+                f"Subject: {self.subject}\n"
+                f"Level: {self.level} (XP: {self.experience}/{self.max_experience})\n"
+                f"Hunger: {self.hunger}/100  Energy: {self.energy}/100  Happiness: {self.happiness}/100\n"
+                f"Streak: {self.streak} days")
 
+    def toggle_pause(self):
+        self.paused = not self.paused
+
+    def apply_decay(self):
+        if self.paused:
+            return
+
+        now = datetime.now()
+        try:
+            last_checked = datetime.fromisoformat(self.last_decay_check)
+        except Exception:
+            last_checked = now
+
+        hours_passed = (now - last_checked).total_seconds() / 3600
+        if hours_passed < 1:
+            return
+
+        decay_hours = int(hours_passed)
+        self.hunger = min(self.hunger + 5 * decay_hours, 100)
+        self.energy = max(self.energy - 3 * decay_hours, 0)
+        self.happiness = max(self.happiness - 2 * decay_hours, 0)
+
+        self.last_decay_check = now.isoformat()
