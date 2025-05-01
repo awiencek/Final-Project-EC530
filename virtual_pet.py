@@ -1,25 +1,20 @@
-# pet.py
 class Pet:
-    def __init__(self, name="Buddy", level=1, experience=0, hunger=50, energy=50, happiness=50):
-        """Initialize a new pet with given or default attributes."""
+    def __init__(self, name="Buddy", level=1, experience=0, hunger=50, energy=50, happiness=50, streak=0, last_goal_completed_at=None):
         self.name = name
         self.level = level
         self.experience = experience
-        # Stats are on a 0–100 scale for simplicity:
-        self.hunger = hunger       # 0 = not hungry (full), 100 = very hungry
-        self.energy = energy       # 0 = exhausted, 100 = fully energized
-        self.happiness = happiness # 0 = very sad, 100 = very happy
-        # Experience needed for next level:
+        self.hunger = hunger
+        self.energy = energy
+        self.happiness = happiness
+        self.streak = streak
+        self.last_goal_completed_at = last_goal_completed_at
         self.max_experience = 100 + (self.level - 1) * 20
 
     def gain_experience(self, amount):
-        """Increase experience points and handle level-ups if the threshold is reached."""
         self.experience += amount
-        # Check for level up as long as we have enough XP for the next level
         while self.experience >= self.max_experience:
             self.experience -= self.max_experience
             self.level += 1
-            # Recalculate next level's experience threshold
             self.max_experience = 100 + (self.level - 1) * 20
 
     def feed(self):
@@ -47,8 +42,8 @@ class Pet:
         self.energy = max(self.energy - 10, 0)  # studying is tiring
         self.hunger = min(self.hunger + 10, 100) # and makes the pet a bit hungry
 
-    def get_summary(self):
-        """Return a formatted string summarizing the pet's status."""
+  def get_summary(self):
         return (f"Name: {self.name}\n"
                 f"Level: {self.level} (XP: {self.experience}/{self.max_experience})\n"
-                f"Hunger: {self.hunger}/100  Energy: {self.energy}/100  Happiness: {self.happiness}/100")
+                f"Hunger: {self.hunger}/100  Energy: {self.energy}/100  Happiness: {self.happiness}/100\n"
+                f"Streak: {self.streak} days")
