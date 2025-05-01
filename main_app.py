@@ -9,7 +9,6 @@ db = StudyAppDB()
 pets = db.list_pets()
 pet_names = [name for name, _ in pets]
 
-# Prompt user to choose or create a pet
 root = tk.Tk()
 root.withdraw()
 
@@ -27,14 +26,12 @@ else:
     pet = Pet(name=new_name, subject=new_subject)
     db.save_pet_state(pet)
 
-# Apply decay at launch
 pet.apply_decay()
 db.save_pet_state(pet)
 
-# Reopen main window
 root = tk.Tk()
 root.title("Virtual Study Pet")
-root.geometry("320x340")
+root.geometry("320x370")
 root.resizable(False, False)
 
 canvas = tk.Canvas(root, width=100, height=100, bg="lightgray")
@@ -85,6 +82,13 @@ def toggle_decay():
     db.save_pet_state(pet)
     refresh_ui()
 
+def edit_subject():
+    new_subject = simpledialog.askstring("Edit Subject", "Enter a new subject for this pet:")
+    if new_subject:
+        pet.subject = new_subject
+        db.update_pet_subject(pet.name, new_subject)
+        refresh_ui()
+
 button_frame = tk.Frame(root)
 button_frame.pack(pady=5)
 tk.Button(button_frame, text="Study", command=handle_study, width=8).pack(side=tk.LEFT, padx=5)
@@ -93,8 +97,8 @@ tk.Button(button_frame, text="Rest", command=handle_rest, width=8).pack(side=tk.
 tk.Button(button_frame, text="Play", command=handle_play, width=8).pack(side=tk.LEFT, padx=5)
 
 tk.Button(root, text="Toggle Nap/Vacation", command=toggle_decay).pack(pady=5)
+tk.Button(root, text="Edit Subject", command=edit_subject).pack(pady=5)
 
-# Cleanup: close DB and window on exit
 def on_close():
     db.save_pet_state(pet)
     db.close()
@@ -102,7 +106,6 @@ def on_close():
 
 root.protocol("WM_DELETE_WINDOW", on_close)
 root.mainloop()
-
 root.protocol("WM_DELETE_WINDOW", on_close)
 
 # Start the Tkinter event loop
