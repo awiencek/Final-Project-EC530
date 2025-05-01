@@ -110,3 +110,7 @@ class StudyAppDB:
 
     def close(self):
         self.conn.close()
+
+    def update_pet_subject(self, name, new_subject):
+        self.cursor.execute("UPDATE pet SET subject = ? WHERE name = ?", (new_subject, name))
+        self.conn.commit()
