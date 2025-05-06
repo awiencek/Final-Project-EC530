@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import simpledialog, messagebox, ttk
 from pet import Pet
 from database import StudyAppDB
 from datetime import datetime
@@ -31,26 +31,32 @@ db.save_pet_state(pet)
 
 root = tk.Tk()
 root.title("Virtual Study Pet")
-root.geometry("320x370")
+root.geometry("340x400")
 root.resizable(False, False)
 
-canvas = tk.Canvas(root, width=100, height=100, bg="lightgray")
-canvas.pack(pady=5)
+style = ttk.Style()
+style.theme_use("clam")
+
+main_frame = ttk.Frame(root, padding=10)
+main_frame.pack(fill=tk.BOTH, expand=True)
+
+canvas = tk.Canvas(main_frame, width=120, height=100, bg="#eeeeee")
+canvas.pack(pady=(0, 10))
 
 status_var = tk.StringVar()
 status_var.set(pet.get_summary())
-status_label = tk.Label(root, textvariable=status_var, justify=tk.LEFT)
+status_label = ttk.Label(main_frame, textvariable=status_var, justify=tk.LEFT)
 status_label.pack(pady=5)
 
 streak_var = tk.StringVar()
 streak_var.set(f"Streak: {pet.streak} days")
-streak_label = tk.Label(root, textvariable=streak_var)
-streak_label.pack(pady=2)
+streak_label = ttk.Label(main_frame, textvariable=streak_var)
+streak_label.pack()
 
 decay_status_var = tk.StringVar()
 decay_status_var.set("Decay: Active" if not pet.paused else "Decay: Paused")
-decay_label = tk.Label(root, textvariable=decay_status_var)
-decay_label.pack(pady=2)
+decay_label = ttk.Label(main_frame, textvariable=decay_status_var)
+decay_label.pack(pady=(0, 10))
 
 def refresh_ui():
     status_var.set(pet.get_summary())
@@ -89,15 +95,26 @@ def edit_subject():
         db.update_pet_subject(pet.name, new_subject)
         refresh_ui()
 
-button_frame = tk.Frame(root)
-button_frame.pack(pady=5)
-tk.Button(button_frame, text="Study", command=handle_study, width=8).pack(side=tk.LEFT, padx=5)
-tk.Button(button_frame, text="Feed", command=handle_feed, width=8).pack(side=tk.LEFT, padx=5)
-tk.Button(button_frame, text="Rest", command=handle_rest, width=8).pack(side=tk.LEFT, padx=5)
-tk.Button(button_frame, text="Play", command=handle_play, width=8).pack(side=tk.LEFT, padx=5)
+button_frame = ttk.Frame(main_frame)
+button_frame.pack(pady=10)
 
-tk.Button(root, text="Toggle Nap/Vacation", command=toggle_decay).pack(pady=5)
-tk.Button(root, text="Edit Subject", command=edit_subject).pack(pady=5)
+btn_opts = {"width": 12, "padding": 5}
+
+study_btn = ttk.Button(button_frame, text="Study", command=handle_study, **btn_opts)
+feed_btn = ttk.Button(button_frame, text="Feed", command=handle_feed, **btn_opts)
+rest_btn = ttk.Button(button_frame, text="Rest", command=handle_rest, **btn_opts)
+play_btn = ttk.Button(button_frame, text="Play", command=handle_play, **btn_opts)
+
+study_btn.grid(row=0, column=0, padx=5, pady=5)
+feed_btn.grid(row=0, column=1, padx=5, pady=5)
+rest_btn.grid(row=1, column=0, padx=5, pady=5)
+play_btn.grid(row=1, column=1, padx=5, pady=5)
+
+control_frame = ttk.Frame(main_frame)
+control_frame.pack(pady=10)
+
+ttk.Button(control_frame, text="Toggle Nap/Vacation", command=toggle_decay, width=28).pack(pady=4)
+ttk.Button(control_frame, text="Edit Subject", command=edit_subject, width=28).pack(pady=4)
 
 def on_close():
     db.save_pet_state(pet)
