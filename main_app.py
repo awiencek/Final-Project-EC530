@@ -3,6 +3,9 @@ from tkinter import simpledialog, messagebox, ttk
 from pet import Pet
 from database import StudyAppDB
 from datetime import datetime
+from collections import defaultdict
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Initialize DB and fetch pet list
 db = StudyAppDB()
@@ -31,7 +34,7 @@ db.save_pet_state(pet)
 
 root = tk.Tk()
 root.title("Virtual Study Pet")
-root.geometry("360x440")
+root.geometry("380x480")
 root.resizable(False, False)
 
 style = ttk.Style()
@@ -108,20 +111,51 @@ def unlock_achievement():
             messagebox.showinfo("Achievement", f"Already unlocked: {name}")
 
 def check_auto_achievements():
-    if pet.level >= 5:
-        if "Scholar" not in pet.achievements:
-            pet.achievements.append("Scholar")
-            messagebox.showinfo("Achievement", "Unlocked: Scholar!")
-    if pet.streak >= 7:
-        if "Consistent" not in pet.achievements:
-            pet.achievements.append("Consistent")
-            messagebox.showinfo("Achievement", "Unlocked: Consistent!")
+    if pet.level >= 5 and "Scholar" not in pet.achievements:
+        pet.achievements.append("Scholar")
+        messagebox.showinfo("Achievement", "Unlocked: Scholar!")
+    if pet.streak >= 7 and "Consistent" not in pet.achievements:
+        pet.achievements.append("Consistent")
+        messagebox.showinfo("Achievement", "Unlocked: Consistent!")
 
 def show_achievements():
     if pet.achievements:
         messagebox.showinfo("Achievements", "Unlocked Achievements:\n" + "\n".join(pet.achievements))
     else:
         messagebox.showinfo("Achievements", "No achievements unlocked yet.")
+
+def view_study_history():
+    goals = db.get_all_goals()
+    counts = defaultdict(int)
+    for goal in goals:
+        if goal[2] and goal[4]:  # completed and has completed_at
+            date_str = goal[4][:10]  # YYYY-MM-DD
+            counts[date_str] += 1
+
+    if not counts:
+        messagebox.showinfo("History", "No study goals completed yet.")
+        return
+
+    dates = sorted(counts.keys())
+    values = [counts[d] for d in dates]
+
+    fig, ax = plt.subplots(figsize=(5, 3.5))
+    ax.bar(dates, values, color="#4CAF50")
+    ax.set_title("Study Goals Completed by Day")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Goals")
+    ax.set_xticklabels(dates, rotation=45, ha='right')
+    fig.tight_layout()
+
+    chart_window = tk.Toplevel(root)
+    chart_window.title("Study History")
+
+    canvas_chart = FigureCanvasTkAgg(fig, master=chart_window)
+    canvas_chart.draw()
+    canvas_chart.get_tk_widget().pack()
+
+    description = "\n".join([f"{d}: {c} goal(s)" for d, c in zip(dates, values)])
+    ttk.Label(chart_window, text=description, justify=tk.LEFT, padding=5).pack()
 
 button_frame = ttk.Frame(main_frame)
 button_frame.pack(pady=10)
@@ -140,6 +174,7 @@ ttk.Button(control_frame, text="Toggle Nap/Vacation", command=toggle_decay, widt
 ttk.Button(control_frame, text="Edit Subject", command=edit_subject, width=28).pack(pady=4)
 ttk.Button(control_frame, text="Unlock Achievement", command=unlock_achievement, width=28).pack(pady=4)
 ttk.Button(control_frame, text="View Achievements", command=show_achievements, width=28).pack(pady=4)
+ttk.Button(control_frame, text="View Study History", command=view_study_history, width=28).pack(pady=4)
 
 def on_close():
     db.save_pet_state(pet)
